@@ -3,7 +3,8 @@ import store from './store'
 import { Notify } from 'quasar'
 import { colorForStatus, iconForStatus } from './constants.js'
 
-const url = `http://${window.location.hostname}:3000`
+let port = process.env.NODE_ENV == 'development' ? 3000 : 80
+const url = `http://${window.location.hostname}:${port}`
 
 const socket = io(url)
 store.state.socket = socket

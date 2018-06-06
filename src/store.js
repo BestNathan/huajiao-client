@@ -18,6 +18,7 @@ export default new Vuex.Store({
     contentInUse: new Set(),
     started: false,
     flv: '',
+    hls: ''
   },
   mutations: {
     clearMessages(state) {

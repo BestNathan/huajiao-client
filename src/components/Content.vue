@@ -14,7 +14,7 @@
         <Messages/>
       </q-tab-pane>
       <q-tab-pane id="huajiaoVideo" name="tab-3" keep-alive>
-        <VideoFlv ref="videoFlv" />
+        <VideoHuajiao ref="VideoHuajiao" />
       </q-tab-pane>
     </q-tabs>
   </q-page>
@@ -22,14 +22,14 @@
 <script>
 import Settings from './Settings.vue'
 import Messages from './Messages.vue'
-import VideoFlv from './VideoHuajiao.vue'
+import VideoHuajiao from './VideoHuajiao.vue'
 
 export default {
   name: 'Content',
   components: {
     Settings,
     Messages,
-    VideoFlv
+    VideoHuajiao
   },
   computed: {
     count() {
@@ -41,16 +41,16 @@ export default {
       switch (type) {
         case 'setting':
           this.$store.state.curTabisLog = false
-          this.$refs.videoFlv && this.$refs.videoFlv.destroyFlv()
+          this.$refs.VideoHuajiao && this.$refs.VideoHuajiao.destroy()
           break
         case 'log':
           this.$store.state.curTabisLog = true
           this.$store.commit('clearNewCount')
-          this.$refs.videoFlv && this.$refs.videoFlv.destroyFlv()
+          this.$refs.VideoHuajiao && this.$refs.VideoHuajiao.destroy()
           break
         case 'video':
           this.$store.state.curTabisLog = false
-          this.$refs.videoFlv && this.$refs.videoFlv.loadFlv()
+          this.$refs.VideoHuajiao && this.$refs.VideoHuajiao.load()
       }
     }
   }

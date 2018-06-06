@@ -140,14 +140,16 @@ export default {
     this.$store.state.socket.on('onCreate', data => {
       if (data.status == 'success') {
         this.roomId = data.roomId
-        this.$store.state.flv = data.flv
+        this.$store.state.flv = `http://qh0-flv.live.huajiao.com/live_huajiao_v2/${data.sn}.flv`
+        this.$store.state.hls = `http://qh0-hls.live.huajiao.com/live_huajiao_v2/${data.sn}/index.m3u8`
         this.canCreate = false
       }
     })
     this.$store.state.socket.on('onStop', reason => {
       if (!reason || reason === 'stop') {
         this.canCreate = true
-        this.$store.state.flv = ''
+        //this.$store.state.flv = ''
+        //this.$store.state.hls = ''
       }
     })
   }

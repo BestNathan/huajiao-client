@@ -1,18 +1,18 @@
 <template>
   <div>
-    <q-field v-show="supported && hasFlv" class="row q-ma-sm">
+    <q-field v-show="supported && canPlay" class="row q-ma-sm">
       <div class="videoContainer">
-        <video class="centeredVideo" id="huajiao" controls autoplay>"对不起该浏览器暂不支持最新的HTML5特性，请使用现代浏览器."</video>
+        <video class="centeredVideo" id="huajiao" playsinline controls autoplay>"对不起该浏览器暂不支持最新的HTML5特性，请使用现代浏览器."</video>
       </div>
       <q-btn-group class="full-width">
-        <q-btn color="primary" class="full-width" label="重新加载" @click="loadFlv" icon="autorenew" />
-        <q-btn color="primary" class="full-width" label="开始播放" @click="playFlv" icon="play_arrow" />
-        <q-btn color="primary" class="full-width" label="暂停播放" @click="pauseFlv" icon="pause" />
+        <q-btn color="primary" class="full-width" label="重新加载" @click="load" icon="autorenew" />
+        <q-btn color="primary" class="full-width" label="开始播放" @click="play" icon="play_arrow" />
+        <q-btn color="primary" class="full-width" label="暂停播放" @click="pause" icon="pause" />
       </q-btn-group>
     </q-field>
-    <q-field v-show="!supported" label="该设备不支持MSE，无法播放直播，请使用PC端访问">
+    <q-field v-show="!supported" label="该设备暂不支持，无法播放直播">
     </q-field>
-    <q-field v-show="!hasFlv" label="未获取到Flv播放地址，请先创建弹幕机">
+    <q-field v-show="!canPlay" label="未获取到播放地址，请先创建弹幕机">
     </q-field>
   </div>
 </template>
@@ -22,18 +22,74 @@ export default {
   data() {
     return {
       ele: null,
-      supported: false,
-      player: null
+      player: null,
+      isHls: false,
+      isFlv: false
     }
   },
   computed: {
     hasFlv() {
-      return this.$store.state.flv != ''
+      return !!this.$store.state.flv
+    },
+    hasHls() {
+      return !!this.$store.state.hls
+    },
+    supported() {
+      return this.isHls || this.isFlv
+    },
+    canPlay() {
+      return (this.isHls && this.hasHls) ||(this.isFlv && this.hasFlv)
     }
   },
   methods: {
+    load() {
+      if (this.isFlv) {
+        return this.loadFlv()
+      }
+      if (this.isHls) {
+        return this.loadHls()
+      }
+    },
+    play() {
+      if (this.isFlv) {
+        return this.playFlv()
+      }
+      if (this.isHls) {
+        return this.playHls()
+      }
+    },
+    pause() {
+      if (this.isFlv) {
+        return this.pauseFlv()
+      }
+      if (this.isHls) {
+        return this.pauseHls()
+      }
+    },
+    destroy() {
+      if (this.isFlv) {
+        return this.destroyFlv()
+      }
+      if (this.isHls) {
+        return this.destroyHls()
+      }
+    },
+    loadHls() {
+      this.pauseHls()
+      this.ele.src = ''
+      this.isHls && (this.ele.src = this.$store.state.hls, this.playHls())
+    },
+    playHls() {
+      this.isHls && this.ele.play()
+    },
+    pauseHls() {
+      this.isHls && this.ele.pause()
+    },
+    destroyHls() {
+      this.isHls && (this.ele.src = '')
+    },
     loadFlv() {
-      if (!this.supported || !this.hasFlv) {
+      if (!this.isFlv || !this.hasFlv) {
         return
       }
       this.destroyFlv()
@@ -71,12 +127,17 @@ export default {
     }
   },
   mounted() {
-    import(/* webpackChunkName: "flv" */'flv.js').then(flv => {
-      this.$flv = flv.default
-      this.ele = document.getElementById('huajiao')
-      this.supported = this.$flv.isSupported()
-      this.loadFlv()
-    })
+    this.ele = document.getElementById('huajiao')
+    if (this.ele.canPlayType('application/vnd.apple.mpegurl')) {
+      this.isHls = true
+      this.load()
+    } else {
+      import(/* webpackChunkName: "flv" */ 'flv.js').then(flv => {
+        this.$flv = flv.default
+        this.isFlv = this.$flv.isSupported()
+        this.load()
+      })
+    }
   }
 }
 </script>
